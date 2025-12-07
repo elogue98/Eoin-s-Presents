@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import Climber from './Climber';
 
 interface MountainPathProps {
@@ -18,8 +18,7 @@ const POINTS = [
   { x: 280, y: 20 },
 ];
 
-export function MountainPath({ progress, isChristmas, climberImage }: MountainPathProps) {
-  // Calculate total length and segments for positioning
+export function MountainPathParticles({ progress, isChristmas, climberImage }: MountainPathProps) {
   const { totalLength, segments } = useMemo(() => {
     let len = 0;
     const segs = [];
@@ -33,11 +32,8 @@ export function MountainPath({ progress, isChristmas, climberImage }: MountainPa
     return { totalLength: len, segments: segs };
   }, []);
 
-  // Calculate current climber position
   const currentPos = useMemo(() => {
     const currentDist = (progress / 100) * totalLength;
-    
-    // Find active segment
     const segment = segments.find(s => currentDist >= s.start && currentDist <= s.start + s.length) || segments[segments.length - 1];
     
     if (!segment) return POINTS[0];
@@ -46,17 +42,26 @@ export function MountainPath({ progress, isChristmas, climberImage }: MountainPa
     const x = segment.p1.x + (segment.p2.x - segment.p1.x) * segmentProgress;
     const y = segment.p1.y + (segment.p2.y - segment.p1.y) * segmentProgress;
 
-    // Clamp to start/end if out of bounds (though progress should be clamped 0-100)
     if (currentDist <= 0) return POINTS[0];
     if (currentDist >= totalLength) return POINTS[POINTS.length - 1];
 
     return { x, y };
   }, [progress, totalLength, segments]);
 
+  const [particles, setParticles] = useState<{ id: number, x: number, y: number }[]>([]);
+
+  useEffect(() => {
+    if (progress > 0 && progress < 100) {
+      const newParticle = { id: Date.now(), x: currentPos.x, y: currentPos.y };
+      setParticles(prev => [...prev.slice(-20), newParticle]);
+    } else if (progress === 0) {
+        setParticles([]);
+    }
+  }, [progress, currentPos]);
+
   const pathString = POINTS.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
   const mountainShape = `${pathString} L 280 380 L 20 380 Z`;
 
-  // Christmas styling overrides
   const strokeColor = isChristmas ? '#166534' : '#3b82f6';
   const trackColor = isChristmas ? '#bbf7d0' : '#e2e8f0';
 
@@ -73,60 +78,69 @@ export function MountainPath({ progress, isChristmas, climberImage }: MountainPa
             <stop offset="0%" stopColor="#e2e8f0" stopOpacity={0.8} />
             <stop offset="100%" stopColor="#f8fafc" stopOpacity={0.2} />
           </linearGradient>
-           <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="4" result="blur" />
+           <filter id="glow-strong" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="6" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
         </defs>
         
-        {/* Background Mountain */}
-        <path
-          d={mountainShape}
-          fill="url(#mountainGradient)"
-          stroke={isChristmas ? '#cbd5e1' : '#cbd5e1'}
-          strokeWidth="2"
-          strokeLinejoin="round"
-        />
+        <path d={mountainShape} fill="url(#mountainGradient)" stroke="#cbd5e1" strokeWidth="2" strokeLinejoin="round" />
 
-        {/* The Track Line */}
-        <path
-          d={pathString}
-          fill="none"
-          stroke={trackColor}
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeDasharray="8 8"
-        />
+        {/* The Track Line - Hidden/Faint */}
+        <path d={pathString} fill="none" stroke={trackColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="4 4" opacity={0.5} />
 
-        {/* The Active Progress Line */}
+        {/* Magic Glowing Path */}
         <motion.path
           d={pathString}
           fill="none"
           stroke={strokeColor}
-          strokeWidth="4"
+          strokeWidth="6"
           strokeLinecap="round"
           strokeLinejoin="round"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: progress / 100 }}
           transition={{ duration: 0.1, ease: "linear" }}
-          filter="url(#glow)"
+          filter="url(#glow-strong)"
+          style={{ opacity: 0.8 }}
+        />
+        
+        {/* Core of path */}
+        <motion.path
+          d={pathString}
+          fill="none"
+          stroke="#fff"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: progress / 100 }}
+          transition={{ duration: 0.1, ease: "linear" }}
         />
       </svg>
 
-      {/* Climber Positioned Absolute */}
-      <div
-        style={{
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none',
-        }}
-      >
-        <div
-          style={{
+      {/* Particles Layer */}
+       <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+        {particles.map(p => (
+            <motion.div
+                key={p.id}
+                initial={{ opacity: 1, scale: 1, x: (p.x / 300) * 300, y: (p.y / 400) * 400 }}
+                animate={{ opacity: 0, scale: 0, y: ((p.y / 400) * 400) + 20 }} // Fall down slightly
+                transition={{ duration: 0.8 }}
+                style={{
+                    position: 'absolute',
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    backgroundColor: isChristmas ? '#fbbf24' : '#60a5fa',
+                    boxShadow: '0 0 4px rgba(255,255,255,0.8)',
+                    transform: 'translate(-50%, -50%)' // Center anchor
+                }}
+            />
+        ))}
+       </div>
+
+      <div style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+        <div style={{
             position: 'absolute',
             left: `${(currentPos.x / 300) * 100}%`,
             top: `${(currentPos.y / 400) * 100}%`,
@@ -141,4 +155,4 @@ export function MountainPath({ progress, isChristmas, climberImage }: MountainPa
   );
 }
 
-export default MountainPath;
+export default MountainPathParticles;

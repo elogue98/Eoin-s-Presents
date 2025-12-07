@@ -10,6 +10,8 @@ export type Gift = {
   extraSectionTitle?: string;
   extraSectionItems?: string[];
   isChristmas?: boolean; // New flag for Christmas styling
+  revealType?: 'climb' | 'unwrap'; // New property to force specific reveal type
+  climberImage?: string; // Optional custom image for climber
 };
 
 export const gifts: Gift[] = [
@@ -34,6 +36,8 @@ export const gifts: Gift[] = [
       'Sunday 12th April 2026',
     ],
     isChristmas: true,
+    revealType: 'climb', // Conor gets the climb (classic)
+    // climberImage removed to fallback to Santa emoji
   },
   {
     slug: 'mark',
@@ -56,6 +60,7 @@ export const gifts: Gift[] = [
       'Sunday 12th April 2026',
     ],
     isChristmas: true,
+    revealType: 'unwrap', // Mark gets the unwrap
   },
 ];
 

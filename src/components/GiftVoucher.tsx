@@ -49,7 +49,7 @@ export function GiftVoucher({ gift }: GiftVoucherProps) {
 
       <div className="voucher-body">
         <div className="voucher-header">
-           {isChristmas && <p className="eyebrow christmas-eyebrow">A Special Christmas Gift</p>}
+           {/* Christmas eyebrow removed as requested */}
           <h1>{gift.title}</h1>
           {gift.subtitle && <p className="voucher-subtitle">{gift.subtitle}</p>}
           <p className="voucher-intro">{gift.intro}</p>
@@ -103,7 +103,7 @@ export function GiftVoucher({ gift }: GiftVoucherProps) {
           )}
           {isChristmas && (
               <p className="christmas-footer-msg">
-                  Have a wonderful Christmas! We'll plan the details in the New Year.
+                  Merry Christmas!
               </p>
           )}
         </footer>

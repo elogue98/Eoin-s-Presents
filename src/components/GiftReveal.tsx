@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Gift } from '../data/gifts';
 import MountainPath from './MountainPath';
+import MountainPathParticles from './MountainPathParticles'; 
+import RevealUnwrap from './RevealUnwrap';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
@@ -9,19 +11,32 @@ type GiftRevealProps = {
   onComplete: () => void;
 };
 
-const CLIMB_DURATION_MS = 4000; // Increased for a slightly longer experience
+const CLIMB_DURATION_MS = 1500; // Reduced to 1500 for much faster climb
 
 export function GiftReveal({ gift, onComplete }: GiftRevealProps) {
+  // Legacy climb state
   const [progress, setProgress] = useState(0);
   const [isHolding, setIsHolding] = useState(false);
-  const hasFinished = useRef(false);
   const isChristmas = gift.isChristmas;
+  
+  // Variation state logic
+  // 0: Climb (Classic)
+  // 1: Scratch Card
+  // 2: Unwrap
+  // 3: Balloons
+  
+  // Determine variation based on gift.revealType
+  const getInitialVariation = () => {
+      if (gift.revealType === 'unwrap') return 2;
+      if (gift.revealType === 'climb') return 1; // Sparkle variation
+      return 0; // Default
+  };
 
-  useEffect(() => {
-    if (progress >= 100 && !hasFinished.current) {
-      hasFinished.current = true;
+  const [variation] = useState<0 | 1 | 2 | 3>(getInitialVariation()); 
+
+  // Helper to trigger confetti and complete
+  const handleRevealComplete = () => {
       if (isChristmas) {
-        // Red, Green, Gold, White confetti
         confetti({
             particleCount: 200,
             spread: 100,
@@ -38,17 +53,26 @@ export function GiftReveal({ gift, onComplete }: GiftRevealProps) {
             disableForReducedMotion: true
           });
       }
-      // Delay completion slightly to let confetti pop
       setTimeout(onComplete, 1200);
+  };
+
+  // --- Logic for Climb (Variation 0 or 1) ---
+  useEffect(() => {
+    if (variation !== 0 && variation !== 1) return;
+
+    if (progress >= 100) {
+        handleRevealComplete();
     }
-  }, [progress, onComplete, isChristmas]);
+  }, [progress, variation]);
 
   useEffect(() => {
+    if (variation !== 0 && variation !== 1) return;
+
     let frame: number;
     let lastTimestamp: number | null = null;
 
     const tick = (timestamp: number) => {
-      if (isHolding && !hasFinished.current) {
+      if (isHolding && progress < 100) {
         if (lastTimestamp === null) {
           lastTimestamp = timestamp;
         }
@@ -66,17 +90,25 @@ export function GiftReveal({ gift, onComplete }: GiftRevealProps) {
     frame = requestAnimationFrame(tick);
 
     return () => cancelAnimationFrame(frame);
-  }, [isHolding]);
+  }, [isHolding, variation, progress]);
 
-  const handleHoldStart = () => {
-    if (!hasFinished.current) {
-      setIsHolding(true);
-    }
+  const handleHoldStart = () => { if(variation === 0 || variation === 1) setIsHolding(true); };
+  const handleHoldEnd = () => { if(variation === 0 || variation === 1) setIsHolding(false); };
+  
+  // --- Text Helper ---
+  const getInstructions = () => {
+      if (variation === 2) return isChristmas ? "Tap to unwrap your present! 🎁" : "Tap to open!";
+      
+      // Default Climb
+      return isChristmas 
+        ? 'Press and hold to scale the snowy peak. Your Christmas surprise awaits at the top.'
+        : 'Press and hold to start your ascent. Reach the peak to reveal your surprise.';
   };
 
-  const handleHoldEnd = () => {
-    setIsHolding(false);
-  };
+  const getTitle = () => {
+      if (variation === 2) return "Unwrap Gift";
+      return isChristmas ? 'Climb to Reveal! 🎅' : 'Hold to climb';
+  }
 
   return (
     <motion.div
@@ -88,31 +120,28 @@ export function GiftReveal({ gift, onComplete }: GiftRevealProps) {
       onPointerUp={handleHoldEnd}
       onPointerLeave={handleHoldEnd}
       onPointerCancel={handleHoldEnd}
-      whileTap={{ scale: 0.99 }}
+      whileTap={(variation === 0 || variation === 1) ? { scale: 0.99 } : undefined}
     >
       <div className="reveal-content">
         <div className="reveal-text">
           <p className="eyebrow-enhanced">
             {isChristmas ? `🎄 A Christmas Gift for ${gift.recipientName}` : `A gift for ${gift.recipientName}`}
           </p>
-          <h1 className="title-enhanced">
-              {isChristmas ? 'Climb to Reveal! 🎅' : 'Hold to climb'}
-          </h1>
+          <h1 className="title-enhanced">{getTitle()}</h1>
           <p className="subtitle-enhanced">
-            {isChristmas 
-                ? 'Press and hold to scale the snowy peak. Your Christmas surprise awaits at the top.'
-                : 'Press and hold to start your ascent. Reach the peak to reveal your surprise.'
-            }
+            {getInstructions()}
           </p>
         </div>
         
-        <div className="mountain-wrapper">
-          <MountainPath progress={progress} isChristmas={isChristmas} />
+        <div className="mountain-wrapper" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+          {variation === 0 && <MountainPath progress={progress} isChristmas={isChristmas} climberImage={gift.climberImage} />}
+          {variation === 1 && <MountainPathParticles progress={progress} isChristmas={isChristmas} climberImage={gift.climberImage} />}
+          {variation === 2 && <RevealUnwrap onComplete={handleRevealComplete} isChristmas={isChristmas} />}
         </div>
       </div>
 
       <AnimatePresence>
-        {!isHolding && progress < 100 && progress > 0 && (
+        {(variation === 0 || variation === 1) && !isHolding && progress < 100 && progress > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

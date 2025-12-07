@@ -98,7 +98,7 @@ a:hover {
   border: 2px solid rgba(255, 255, 255, 0.8);
   border-radius: 32px;
   padding: 32px;
-  width: min(720px, 100%);
+  width: min(840px, 100%); /* Increased max-width slightly to give more room */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -125,13 +125,15 @@ a:hover {
 .reveal-content {
   display: flex;
   align-items: center;
-  gap: 32px;
+  justify-content: space-between; /* Ensure spacing */
+  gap: 40px; /* Increased gap */
   width: 100%;
 }
 
 .reveal-text {
-  flex: 1;
+  flex: 1; /* Allow text to take up available space */
   text-align: left;
+  min-width: 200px; /* Ensure text column doesn't collapse too much */
 }
 
 .mountain-wrapper {
@@ -139,6 +141,8 @@ a:hover {
   position: relative;
   /* Add a subtle float animation */
   animation: float 6s ease-in-out infinite;
+  max-width: 300px; /* Constraint mountain width */
+  width: 40%; /* Approximate width ratio */
 }
 
 @keyframes float {
@@ -178,7 +182,7 @@ a:hover {
   font-size: 1.1rem;
   color: #475569;
   margin: 0;
-  max-width: 380px;
+  max-width: 420px; /* Increased width limit for text readability */
   line-height: 1.5;
 }
 
@@ -479,6 +483,11 @@ a:hover {
   
   .subtitle-enhanced {
     margin: 0 auto;
+  }
+  
+  .mountain-wrapper {
+      width: 100%;
+      max-width: 100%;
   }
 
   /* Voucher Card Mobile */
