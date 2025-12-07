@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" role="img" aria-labelledby="title desc">
+  <title id="title">Mourne Mountains climbing illustration</title>
+  <desc id="desc">Stylised mountains with a sunrise gradient sky.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#cfe4ff" />
+      <stop offset="60%" stop-color="#f3f7ff" />
+      <stop offset="100%" stop-color="#f6f8fb" />
+    </linearGradient>
+    <linearGradient id="rock" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2b4f89" />
+      <stop offset="100%" stop-color="#1f3765" />
+    </linearGradient>
+    <linearGradient id="rock2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4069b3" />
+      <stop offset="100%" stop-color="#203a6a" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="600" fill="url(#sky)" />
+
+  <path
+    d="M0 430 L220 300 L420 420 L630 310 L820 420 L1020 300 L1200 420 L1200 600 L0 600 Z"
+    fill="url(#rock2)"
+    opacity="0.8"
+  />
+  <path
+    d="M0 470 L250 360 L430 450 L650 340 L860 470 L1040 360 L1200 470 L1200 600 L0 600 Z"
+    fill="url(#rock)"
+  />
+  <path
+    d="M0 520 L240 430 L440 520 L620 430 L840 520 L1040 430 L1200 530 L1200 600 L0 600 Z"
+    fill="#14274a"
+    opacity="0.85"
+  />
+  <circle cx="190" cy="140" r="60" fill="#ffd873" opacity="0.85" />
+  <path
+    d="M820 460 C840 430 880 430 900 460 L930 510 L860 510 Z"
+    fill="#f4a261"
+    opacity="0.7"
+  />
+</svg>
+
