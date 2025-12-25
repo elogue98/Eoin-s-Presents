@@ -62,6 +62,26 @@ export const gifts: Gift[] = [
     isChristmas: true,
     revealType: 'unwrap', // Mark gets the unwrap
   },
+  {
+    slug: 'mum',
+    recipientName: 'Mum',
+    title: 'COOKERY CLASS FOR TWO – WATERMAN HOUSE',
+    subtitle: 'Niall McKenna’s Cookery School, Belfast',
+    intro:
+      'A hands-on cookery class we’ll do together at Waterman House. We’ll pick the theme later—just a fun day cooking, learning, and eating side by side.',
+    heroImage: '/mournes-climb.svg', // Swap to a Waterman image if added later
+    whatsIncludedTitle: 'What’s Planned',
+    whatsIncludedItems: [
+      'Cookery class for two at Waterman House',
+    ],
+    extraSectionTitle: 'Notes & Dates',
+    extraSectionItems: [
+      'Venue: Waterman House, Belfast',
+      'We’ll pick the class and date when you’re ready',
+    ],
+    isChristmas: true,
+    revealType: 'unwrap',
+  },
 ];
 
 export function getGiftBySlug(slug: string): Gift | undefined {
